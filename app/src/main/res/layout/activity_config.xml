@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_config"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:background="@color/colorPrimaryDark"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_weight="1"
+    tools:context="com.example.lzanuzzo.tccapp.Config">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/elevation"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@drawable/layout_bg_green"
+        android:orientation="vertical"
+        android:padding="@dimen/fab_margin"
+        >
+
+        <Button
+            android:text="Reset Raspberry"
+            android:textColor="@color/colorPrimaryLight"
+            android:background="@drawable/layout_bg"
+            android:elevation="@dimen/elevation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonReset" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:elevation="@dimen/elevation"
+        android:background="@drawable/layout_bg_green"
+        android:orientation="vertical"
+        android:padding="@dimen/fab_margin"
+        >
+
+        <TextView
+            android:text="Database capacity: x%"
+            android:textColor="@color/colorPrimaryLight"
+            android:padding="@dimen/fab_margin"
+            android:textSize="@dimen/fontBig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView5" />
+
+        <Button
+            android:text="Clean Database"
+            android:textColor="@color/colorPrimaryLight"
+            android:background="@drawable/layout_bg"
+            android:elevation="@dimen/elevation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonClean" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

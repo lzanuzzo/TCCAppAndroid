@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_historic"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:background="@drawable/layout_bg"
+    android:layout_height="match_parent"
+    android:padding="@dimen/activity_vertical_margin">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="@dimen/elevation"
+        android:background="@drawable/layout_bg_green"
+        android:orientation="horizontal"
+        android:layout_margin="@dimen/activity_horizontal_margin">
+
+        <TextView
+            android:text="x"
+            android:textColor="@color/colorPrimaryLight"
+            android:textSize="34dp"
+            android:layout_margin="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textViewListId"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:elevation="@dimen/elevation"
+        android:background="@drawable/layout_bg_green"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            >
+
+            <TextView
+                android:text="Liters: "
+                android:textColor="@color/colorPrimaryLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewListLitersStr"
+                />
+
+            <TextView
+                android:text="TextView"
+                android:textColor="@color/colorPrimaryLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewListLiters"
+                />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="@dimen/activity_horizontal_margin">
+
+            <TextView
+                android:text="Start: "
+                android:textColor="@color/colorPrimaryLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewListStartDateStr"
+                />
+
+            <TextView
+                android:text="TextView"
+                android:textColor="@color/colorPrimaryLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewListStartDate"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="@dimen/activity_horizontal_margin">
+
+            <TextView
+                android:text="End: "
+                android:textColor="@color/colorPrimaryLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewListEndDateStr"
+                />
+
+            <TextView
+                android:text="TextView"
+                android:textColor="@color/colorPrimaryLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewListEndDate"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+
+
+</LinearLayout>

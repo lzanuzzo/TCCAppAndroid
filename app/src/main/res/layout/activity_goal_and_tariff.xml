@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_goal_and_tariff"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimaryDark"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.lzanuzzo.tccapp.GoalAndTariff">
+
+    <LinearLayout
+        android:id="@+id/linear_layout_goal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:elevation="@dimen/elevation"
+        android:layout_margin="@dimen/well_margin"
+        android:layout_weight="1"
+        >
+
+        <TextView
+            android:textSize="@dimen/fontBig"
+            android:text="Goal: \n in Liters"
+            android:layout_margin="@dimen/fab_margin"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimaryLight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            />
+
+        <EditText
+            android:textSize="@dimen/fontBig"
+            android:elevation="@dimen/elevation"
+            android:background="@drawable/layout_bg_green"
+            android:padding="@dimen/well_margin"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/fab_margin"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimaryLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:ems="5"
+            android:id="@+id/goal_value"
+            />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        >
+
+        <LinearLayout
+            android:id="@+id/linear_layout_tariff_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:elevation="@dimen/elevation"
+            android:layout_margin="@dimen/fab_margin"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:textSize="@dimen/fontBig"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimaryLight"
+                android:text="Cubic Meters: "
+                android:layout_margin="@dimen/fab_margin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView2" />
+
+            <TextView
+                android:textSize="@dimen/fontBig"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:layout_margin="@dimen/fab_margin"
+                android:textColor="@color/colorPrimaryLight"
+                android:text="Value R$: "
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView3" />
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linear_layout_tariff_numbers"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1"
+            >
+
+            <EditText
+                android:textSize="@dimen/fontBig"
+                android:layout_margin="@dimen/fab_margin"
+                android:elevation="@dimen/elevation"
+                android:background="@drawable/layout_bg_green"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimaryLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:ems="5"
+                android:padding="@dimen/fab_margin"
+                android:id="@+id/tariff_volume" />
+
+            <EditText
+                android:textSize="@dimen/fontBig"
+                android:layout_margin="@dimen/fab_margin"
+                android:elevation="@dimen/elevation"
+                android:background="@drawable/layout_bg_green"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimaryLight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:ems="5"
+                android:padding="@dimen/fab_margin"
+                android:id="@+id/tariff_value" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+
+
+</LinearLayout>

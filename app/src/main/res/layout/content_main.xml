@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_main"
+    android:background="@color/colorPrimary"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.example.lzanuzzo.tccapp.MainActivity"
+    tools:showIn="@layout/app_bar_main"
+    >
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/well_margin"
+        android:elevation="@dimen/elevation"
+        android:background="@drawable/layout_bg"
+        android:layout_weight="1"
+        android:layout_gravity="center_horizontal"
+        >
+
+        <ImageView
+            android:id="@+id/syncImage"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+        />
+
+        <TextView
+            android:text="  "
+            android:layout_gravity="center"
+            android:textColor="@color/colorPrimaryLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/debugLabel"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+            android:layout_weight="1"
+        />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/LinearLayoutCenterShape"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:elevation="@dimen/elevation"
+        android:background="@drawable/layout_bg"
+        android:layout_margin="@dimen/well_margin"
+        android:layout_weight="3"
+        >
+
+        <TextView
+            android:text="No read at the moment..."
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/TextViewReadDate"
+            android:textColor="@color/colorPrimaryLight"
+            android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="24dp"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:text="Liters: "
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewLiters"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large" />
+
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewLitersValue"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                android:text="" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/well_margin"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:text="Flow: "
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewFlow"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewFlowValue"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                android:text="" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/well_margin"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:text="Unix: "
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewUnix"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                />
+
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewUnixValue"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                android:text="" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/well_margin"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:text="Spend: "
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewSpend"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                />
+
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewUnixSpend"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                android:text="" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/well_margin"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:text="Tariff: "
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewTariff"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                />
+
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewUnixTariff"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                android:text="" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/well_margin"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:text="Goal: "
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewGoal"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                />
+
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textViewUnixGoal"
+                android:textColor="@color/colorPrimaryLight"
+                android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                android:text="" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:layout_weight="1"
+        android:layout_gravity="center_horizontal"
+        >
+
+        <Button
+            android:text="Begin Read"
+            android:elevation="@dimen/elevation"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/layout_bg"
+            android:textColor="@color/colorPrimaryLight"
+            android:id="@+id/buttonBeginRead" />
+        <Button
+            android:text="End Read"
+            android:elevation="@dimen/elevation"
+            android:layout_gravity="center"
+            android:background="@drawable/layout_bg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimaryLight"
+            android:id="@+id/buttonEndRead" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
