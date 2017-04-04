@@ -29,8 +29,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Set;
 import java.util.UUID;
@@ -65,12 +69,16 @@ public class MainActivity extends AppCompatActivity
     ImageView syncImage;
     LinearLayout centerShape;
 
+    File file;
+    String filename = "waterfyAppVariables";
+    static final int READ_BLOCK_SIZE = 100;
+
     Button buttonBeginRead;
     Button buttonEndRead;
 
-    int Goal;
+    int goalValue;
     double cubicMeters;
-    double valueCubicMeters;
+    double volumeValue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +132,53 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG,"Adapter Already Enabled");
                 Intent enableBluetooth = new Intent(ACTION_REQUEST_ENABLE);
                 onActivityResult(1,-1,enableBluetooth);
+            }
+            try{
+                file = new File(MainActivity.this.getFilesDir(), filename);
+                if(file.exists())
+                {
+                    FileInputStream fileInputStream = openFileInput(filename);
+                    InputStreamReader InputRead = new InputStreamReader(fileInputStream);
+
+                    char[] inputBuffer= new char[READ_BLOCK_SIZE];
+                    String valuesString="";
+                    int charRead;
+
+                    while ((charRead = InputRead.read(inputBuffer))>0) {
+                        // char to string conversion
+                        String readString = String.copyValueOf(inputBuffer,0,charRead);
+                        valuesString +=readString;
+                    }
+                    InputRead.close();
+                    Log.d(TAG,"Read file content!");
+
+                    String[] valuesArray = valuesString.split(";");
+                    if(valuesArray.length == 3){
+                        /*goalValue = valuesArray[0];
+                        cubicMeters = valuesArray[1];
+                        volumeValue = valuesArray[2];
+
+                        .setText(goalValue);
+                        .setText(cubicMeters);
+                        .setText(volumeValue);
+                        textViewUnixTariff
+                        textViewUnixGoal
+                        textViewUnixSpend*/
+                        Log.d(TAG,"Values set at EditText's");
+                    }
+
+                }else {
+                    Log.d(TAG,"Creating a new file...");
+                    Log.d(TAG,MainActivity.this.getFilesDir().toString());
+                    FileOutputStream fileOutputStream = new FileOutputStream(MainActivity.this.getFilesDir()+"/"+filename);
+                    //outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                    fileOutputStream.write("10;10;26.20".getBytes());
+                    fileOutputStream.close();
+                    Log.d(TAG,"Default values loaded successfully");
+                }
+            } catch (IOException e) {
+                Log.e(TAG,e.toString());
+                e.printStackTrace();
             }
 
             buttonBeginRead.setOnClickListener(new View.OnClickListener() {

@@ -35,6 +35,7 @@ public class Historic extends AppCompatActivity {
     private String TAG = Historic.class.getSimpleName();
 
     Integer REQ_BT_ENABLE=1;
+    Integer BT_AC_FLAG = 1;
 
     private ProgressDialog pDialog;
     private ListView listViewHistoric;
@@ -60,6 +61,7 @@ public class Historic extends AppCompatActivity {
             errorAlertDialog("No bluetooth adapter available ...");
         }
         else {
+            BT_AC_FLAG = 1;
             Log.d(TAG,"Adapter available");
             if (!mBluetoothAdapter.isEnabled()) {
                 Log.d(TAG,"Enable adapter");
@@ -301,26 +303,37 @@ public class Historic extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        try {
-            if(mmSocket!=null) {
-                mmSocket.close();
-                Log.d(TAG,"Socket Closed");
+        Log.d(TAG,"OnPause");
+        if(BT_AC_FLAG!=1){
+            try {
+                if(mmSocket!=null) {
+                    mmSocket.close();
+                    Log.d(TAG,"Socket Closed");
+                }
+            }
+            catch (IOException e) {
+                Log.e(TAG,"Error closing mmSocket...");
+                Log.e(TAG,e.toString());
+                e.printStackTrace();
             }
         }
-        catch (IOException e) {
-            Log.e(TAG,"Error closing mmSocket...");
-            Log.e(TAG,e.toString());
-            e.printStackTrace();
-        }
-        Log.d(TAG,"Pausing");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG,"Back from pause");
-        Intent enableBluetooth = new Intent(ACTION_REQUEST_ENABLE);
-        onActivityResult(1,-1,enableBluetooth);
+        Log.d(TAG,"OnResume");
+        if(BT_AC_FLAG!=1){
+            Intent enableBluetooth = new Intent(ACTION_REQUEST_ENABLE);
+            BT_AC_FLAG = 1;
+            onActivityResult(1,-1,enableBluetooth);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        BT_AC_FLAG = 0;
     }
 
     public void errorAlertDialog(String errorMsg){

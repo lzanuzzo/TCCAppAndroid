@@ -155,7 +155,6 @@ public class Config extends AppCompatActivity {
         cleanDatabaseAsyncTask.execute();
     }
 
-
     void resetRasp(){
         final AsyncTask<BluetoothSocket, Void, Boolean> resetAsyncTask = new AsyncTask<BluetoothSocket, Void, Boolean>() {
             private ProgressDialog dialog;
@@ -229,7 +228,6 @@ public class Config extends AppCompatActivity {
         resetAsyncTask.execute();
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQ_BT_ENABLE) {
@@ -268,8 +266,7 @@ public class Config extends AppCompatActivity {
             finish();
         }
     }
-
-
+    
     @Override
     protected void onPause() {
         super.onPause();
@@ -287,6 +284,12 @@ public class Config extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        BT_AC_FLAG = 0;
     }
 
     @Override
