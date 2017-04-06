@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -27,7 +26,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,6 +63,9 @@ public class MainActivity extends AppCompatActivity
     TextView textViewLitersValue;
     TextView textViewReadDate;
     TextView textViewUnixValue;
+    TextView textViewGoal;
+    TextView textViewSpend;
+    TextView textViewTariff;
     TextView debugLabel;
     ImageView syncImage;
     LinearLayout centerShape;
@@ -77,8 +78,9 @@ public class MainActivity extends AppCompatActivity
     Button buttonEndRead;
 
     int goalValue;
-    double cubicMeters;
-    double volumeValue;
+    Float cubicMeters;
+    Float volumeValue;
+    Float spendNow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +96,11 @@ public class MainActivity extends AppCompatActivity
         textViewLitersValue = (TextView) findViewById(R.id.textViewLitersValue);
         textViewUnixValue = (TextView) findViewById(R.id.textViewUnixValue);
         textViewReadDate = (TextView) findViewById(R.id.TextViewReadDate);
+
+        textViewGoal = (TextView) findViewById(R.id.textViewValueGoal);
+        textViewSpend = (TextView) findViewById(R.id.textViewValueSpend);
+        textViewTariff = (TextView) findViewById(R.id.textViewValueTariff);
+
         debugLabel = (TextView) findViewById(R.id.debugLabel);
         syncImage = (ImageView) findViewById(R.id.syncImage);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -101,6 +108,7 @@ public class MainActivity extends AppCompatActivity
         centerShape = (LinearLayout) findViewById(R.id.LinearLayoutCenterShape);
         buttonBeginRead = (Button) findViewById(R.id.buttonBeginRead);
         buttonEndRead = (Button) findViewById(R.id.buttonEndRead);
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         centerShape.setVisibility(View.GONE);
@@ -109,7 +117,7 @@ public class MainActivity extends AppCompatActivity
 
         debugLabel.setText("No device...");
 
-        final Handler handler = new Handler();
+        spendNow = 0.0f;
 
         if(mBluetoothAdapter == null)
         {
@@ -133,53 +141,7 @@ public class MainActivity extends AppCompatActivity
                 Intent enableBluetooth = new Intent(ACTION_REQUEST_ENABLE);
                 onActivityResult(1,-1,enableBluetooth);
             }
-            try{
-                file = new File(MainActivity.this.getFilesDir(), filename);
-                if(file.exists())
-                {
-                    FileInputStream fileInputStream = openFileInput(filename);
-                    InputStreamReader InputRead = new InputStreamReader(fileInputStream);
 
-                    char[] inputBuffer= new char[READ_BLOCK_SIZE];
-                    String valuesString="";
-                    int charRead;
-
-                    while ((charRead = InputRead.read(inputBuffer))>0) {
-                        // char to string conversion
-                        String readString = String.copyValueOf(inputBuffer,0,charRead);
-                        valuesString +=readString;
-                    }
-                    InputRead.close();
-                    Log.d(TAG,"Read file content!");
-
-                    String[] valuesArray = valuesString.split(";");
-                    if(valuesArray.length == 3){
-                        /*goalValue = valuesArray[0];
-                        cubicMeters = valuesArray[1];
-                        volumeValue = valuesArray[2];
-
-                        .setText(goalValue);
-                        .setText(cubicMeters);
-                        .setText(volumeValue);
-                        textViewUnixTariff
-                        textViewUnixGoal
-                        textViewUnixSpend*/
-                        Log.d(TAG,"Values set at EditText's");
-                    }
-
-                }else {
-                    Log.d(TAG,"Creating a new file...");
-                    Log.d(TAG,MainActivity.this.getFilesDir().toString());
-                    FileOutputStream fileOutputStream = new FileOutputStream(MainActivity.this.getFilesDir()+"/"+filename);
-                    //outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                    fileOutputStream.write("10;10;26.20".getBytes());
-                    fileOutputStream.close();
-                    Log.d(TAG,"Default values loaded successfully");
-                }
-            } catch (IOException e) {
-                Log.e(TAG,e.toString());
-                e.printStackTrace();
-            }
 
             buttonBeginRead.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -235,6 +197,15 @@ public class MainActivity extends AppCompatActivity
                                 mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
                                 Log.d(TAG,"mmSocket Created");
                                 textViewReadDate.setText("Use the sync button!");
+                                mmSocket.connect();
+                                Log.d(TAG,"mmSocket Connected");
+                                String msg = "r";
+                                OutputStream mmOutputStream = mmSocket.getOutputStream();
+                                Log.d(TAG,"mmOutputStream created");
+                                mmOutputStream.write(msg.getBytes());
+                                Log.d(TAG,"Msg Send 'r' (read)");
+
+
                             } catch (IOException e) {
                                 Log.e(TAG,"Error trying to create mmSocket");
                                 Log.e(TAG,e.toString());
@@ -245,7 +216,7 @@ public class MainActivity extends AppCompatActivity
                                         .show();
                                 e.printStackTrace();
                             }
-                            syncImage.setImageResource(R.drawable.sync_on);
+                            syncImage.setImageResource(R.drawable.sync_off);
                             centerShape.setVisibility(View.VISIBLE);
                             buttonBeginRead.setVisibility(View.VISIBLE);
                             buttonEndRead.setVisibility(View.VISIBLE);
@@ -272,7 +243,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     void beginListenForData() {
-        ProgressDialog dialog;
+
         textViewReadDate.setVisibility(View.INVISIBLE);
         Log.d(TAG,"Begin listening for data");
         if(mmDevice != null && mmSocket != null) {
@@ -321,10 +292,27 @@ public class MainActivity extends AppCompatActivity
                                         handler.post(new Runnable() {
                                             public void run() {
                                                 String[] dataArray = data.split(";");
-                                                textViewFlowValue.setText(dataArray[1] + " l/min");
-                                                textViewLitersValue.setText(dataArray[2] + " ml");
-                                                textViewUnixValue.setText(dataArray[0] + " s");
+                                                Log.e(TAG,data.toString());
+                                                if(dataArray.length == 3){
+                                                    textViewFlowValue.setText(dataArray[1] + " l/min");
+                                                    textViewLitersValue.setText(dataArray[2] + " ml");
+                                                    textViewUnixValue.setText(dataArray[0] + " s");
 
+                                                    Float litersNow = Float.parseFloat(dataArray[2]);
+                                                    if(cubicMeters != 0.0f){
+                                                        spendNow = ((litersNow/1000.0f)*volumeValue)/cubicMeters;
+                                                    }
+                                                    else spendNow = 0.0f;
+                                                    textViewSpend.setText(" R$ "+spendNow.toString());
+                                                }
+                                                else {
+                                                    workDone = true;
+                                                    new AlertDialog.Builder(MainActivity.this)
+                                                            .setTitle("Error")
+                                                            .setMessage("Error in received data")
+                                                            .setIcon(android.R.drawable.ic_dialog_alert)
+                                                            .show();
+                                                }
                                             }
                                         });
                                     } else {
@@ -343,7 +331,7 @@ public class MainActivity extends AppCompatActivity
                                 Log.d(TAG,"Work is done, closing the socket");
                                 mmSocket.close();
                             } catch (IOException e) {
-                                Log.e(TAG,"mmSocket not connected, connecting...");
+                                Log.e(TAG,"mmSocket not connected! Unable to close");
                                 Log.e(TAG,e.toString());
                                 e.printStackTrace();
                             }
@@ -356,6 +344,7 @@ public class MainActivity extends AppCompatActivity
             if(mmInputStream != null && !workDone)
             {
                 Log.d(TAG,"mmInputStream created and !workdone, starting worker thread");
+                syncImage.setImageResource(R.drawable.sync_on);
                 workerThread.start();
             }
             else{
@@ -550,10 +539,12 @@ public class MainActivity extends AppCompatActivity
                 if(mmSocket!=null) {
                     mmSocket.close();
                     Log.d(TAG,"Socket Closed");
+                    syncImage.setImageResource(R.drawable.sync_off);
                 }
             }
             catch (IOException e) {
                 Log.e(TAG,"Error closing mmSocket...");
+                syncImage.setImageResource(R.drawable.sync_off);
                 Log.e(TAG,e.toString());
                 e.printStackTrace();
             }
@@ -564,6 +555,54 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         Log.d(TAG,"OnResume");
+
+        try{
+            file = new File(MainActivity.this.getFilesDir(), filename);
+            if(file.exists())
+            {
+                FileInputStream fileInputStream = openFileInput(filename);
+                InputStreamReader InputRead = new InputStreamReader(fileInputStream);
+
+                char[] inputBuffer= new char[READ_BLOCK_SIZE];
+                String valuesString="";
+                int charRead;
+
+                while ((charRead = InputRead.read(inputBuffer))>0) {
+                    // char to string conversion
+                    String readString = String.copyValueOf(inputBuffer,0,charRead);
+                    valuesString +=readString;
+                }
+                InputRead.close();
+                Log.d(TAG,"Read file content!");
+
+                String[] valuesArray = valuesString.split(";");
+                if(valuesArray.length == 3){
+
+                    goalValue = Integer.parseInt(valuesArray[0]);
+                    cubicMeters = Float.parseFloat(valuesArray[1]);
+                    volumeValue = Float.parseFloat(valuesArray[2]);
+
+                    textViewGoal.setText(" "+valuesArray[0]+" L");
+                    textViewSpend.setText(" R$ "+spendNow.toString());
+                    textViewTariff.setText(" R$"+valuesArray[2]+" - "+valuesArray[1]+"m³");
+
+                    Log.d(TAG,"Values set at EditText's");
+                }
+
+            }else {
+                Log.d(TAG,"Creating a new file...");
+                Log.d(TAG,MainActivity.this.getFilesDir().toString());
+                FileOutputStream fileOutputStream = new FileOutputStream(MainActivity.this.getFilesDir()+"/"+filename);
+                //outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                fileOutputStream.write("10;10;26.20".getBytes());
+                fileOutputStream.close();
+                Log.d(TAG,"Default values loaded successfully");
+            }
+        } catch (IOException e) {
+            Log.e(TAG,e.toString());
+            e.printStackTrace();
+        }
+
         if(BT_AC_FLAG!=1){
             Intent enableBluetooth = new Intent(ACTION_REQUEST_ENABLE);
             BT_AC_FLAG = 1;

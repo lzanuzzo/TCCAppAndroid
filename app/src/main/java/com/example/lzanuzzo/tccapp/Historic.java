@@ -37,7 +37,7 @@ public class Historic extends AppCompatActivity {
     Integer REQ_BT_ENABLE=1;
     Integer BT_AC_FLAG = 1;
 
-    private ProgressDialog pDialog;
+    private ProgressDialog pDialogHistoric;
     private ListView listViewHistoric;
 
     BluetoothSocket mmSocket = null;
@@ -47,6 +47,8 @@ public class Historic extends AppCompatActivity {
     InputStream mmInputStream;
 
     ArrayList<HashMap<String, String>> readList;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,19 +78,16 @@ public class Historic extends AppCompatActivity {
         }
     }
 
-    /**
-     * Async task class to get json by making HTTP call
-     */
     private class getReadList extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             // Showing progress dialog
-            pDialog = new ProgressDialog(Historic.this);
-            pDialog.setMessage("Please wait...");
-            pDialog.setCancelable(true);
-            pDialog.show();
+            pDialogHistoric = new ProgressDialog(Historic.this);
+            pDialogHistoric.setMessage("Please wait...");
+            pDialogHistoric.setCancelable(true);
+            pDialogHistoric.show();
         }
 
         @Override
@@ -109,7 +108,7 @@ public class Historic extends AppCompatActivity {
                     mmSocket.connect();
 
                 }
-                mmOutputStream = mmSocket.getOutputStream();
+                //mmOutputStream = mmSocket.getOutputStream();
                 mmInputStream = mmSocket.getInputStream();
                 while(HistoricGet) {
                     try {
@@ -156,8 +155,8 @@ public class Historic extends AppCompatActivity {
                     if (!HistoricGet){
                         try {
                             Log.d(TAG,"Work is done, closing the socket");
-                            String msg = "h";
-                            mmOutputStream.write(msg.getBytes());
+                            //String msg = "h";
+                            //mmOutputStream.write(msg.getBytes());
                             mmSocket.close();
 
                         } catch (IOException e) {
@@ -204,8 +203,8 @@ public class Historic extends AppCompatActivity {
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
             // Dismiss the progress dialog
-            if (pDialog.isShowing())
-                pDialog.dismiss();
+            if (pDialogHistoric.isShowing())
+                pDialogHistoric.dismiss();
             /**
              * Updating parsed JSON data into ListView
              * */
@@ -259,6 +258,7 @@ public class Historic extends AppCompatActivity {
 
                                 readList = new ArrayList<>();
                                 listViewHistoric = (ListView) findViewById(R.id.ListViewHistoric);
+                                listViewHistoric.setLongClickable(true);
                                 listViewHistoric.setOnItemClickListener(new AdapterView.OnItemClickListener()
                                 {
                                     @Override
@@ -266,6 +266,16 @@ public class Historic extends AppCompatActivity {
                                     {
                                         String positionContent = listViewHistoric.getItemAtPosition(position).toString();
                                         Toast.makeText(Historic.this, "Position: " + positionContent, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                listViewHistoric.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                                    @Override
+                                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long id) {
+
+                                        String positionContent = listViewHistoric.getItemAtPosition(position).toString();
+                                        Toast.makeText(Historic.this, "Position: " + positionContent, Toast.LENGTH_SHORT).show();
+
+                                        return true;
                                     }
                                 });
                                 new getReadList().execute();

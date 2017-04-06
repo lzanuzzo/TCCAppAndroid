@@ -170,7 +170,7 @@
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/textViewUnixSpend"
+                android:id="@+id/textViewValueSpend"
                 android:textColor="@color/colorPrimaryLight"
                 android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
                 android:text="" />
@@ -198,7 +198,7 @@
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/textViewUnixTariff"
+                android:id="@+id/textViewValueTariff"
                 android:textColor="@color/colorPrimaryLight"
                 android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
                 android:text="" />
@@ -226,7 +226,7 @@
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/textViewUnixGoal"
+                android:id="@+id/textViewValueGoal"
                 android:textColor="@color/colorPrimaryLight"
                 android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
                 android:text="" />
@@ -239,15 +239,15 @@
         android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
         android:layout_weight="1"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center"
         >
 
         <Button
             android:text="Begin Read"
             android:elevation="@dimen/elevation"
             android:layout_gravity="center"
+            android:layout_marginRight="@dimen/fab_margin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/layout_bg"
@@ -256,6 +256,7 @@
         <Button
             android:text="End Read"
             android:elevation="@dimen/elevation"
+            android:layout_marginRight="@dimen/fab_margin"
             android:layout_gravity="center"
             android:background="@drawable/layout_bg"
             android:layout_width="wrap_content"
