@@ -180,60 +180,103 @@ public class MainActivity extends AppCompatActivity
         if(requestCode == REQ_BT_ENABLE){
             if (resultCode == RESULT_OK){
                 Log.d(TAG, "BlueTooth is now Enabled");
-                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                if (pairedDevices.size() > 0) {
-                    Log.d(TAG,"Paired Devices > 0");
-                    for (BluetoothDevice device : pairedDevices) {
-                        if (device.getName().equals("Rasp Wiki"))
+
+                final AsyncTask<BluetoothSocket, Void, Boolean> beginBluetoothConnection = new AsyncTask<BluetoothSocket, Void, Boolean>() {
+                    private ProgressDialog dialog;
+
+                    @Override
+                    protected void onPreExecute()
+                    {
+                        this.dialog = new ProgressDialog(MainActivity.this);
+                        this.dialog.setMessage("Attempting to pair with the device...");
+                        this.dialog.setCancelable(true);
+                        this.dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
                         {
-                            Log.d(TAG, "Device paired: "+device.getName());
-                            debugLabel.setText(device.getName());
-
-                            mmDevice = device;
-                            Log.d(TAG, "Device assigned ");
-                            UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
-                            Log.d(TAG, "UUID assigned ");
-                            try {
-                                mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-                                Log.d(TAG,"mmSocket Created");
-                                textViewReadDate.setText("Use the sync button!");
-                                mmSocket.connect();
-                                Log.d(TAG,"mmSocket Connected");
-                                String msg = "r";
-                                OutputStream mmOutputStream = mmSocket.getOutputStream();
-                                Log.d(TAG,"mmOutputStream created");
-                                mmOutputStream.write(msg.getBytes());
-                                Log.d(TAG,"Msg Send 'r' (read)");
-
-
-                            } catch (IOException e) {
-                                Log.e(TAG,"Error trying to create mmSocket");
-                                Log.e(TAG,e.toString());
-                                new AlertDialog.Builder(this)
-                                        .setTitle("Error")
-                                        .setMessage("Error trying to connect with the raspberry!")
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
-                                        .show();
-                                e.printStackTrace();
+                            @Override
+                            public void onCancel(DialogInterface dialog)
+                            {
+                                // cancel AsyncTask
+                                cancel(false);
                             }
-                            syncImage.setImageResource(R.drawable.sync_off);
-                            centerShape.setVisibility(View.VISIBLE);
-                            buttonBeginRead.setVisibility(View.VISIBLE);
-                            buttonEndRead.setVisibility(View.VISIBLE);
-                            break;
+                        });
+
+                        this.dialog.show();
+
+                    }
+
+                    @Override
+                    protected Boolean doInBackground(BluetoothSocket... params)
+                    {
+                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                        if (pairedDevices.size() > 0) {
+                            Log.d(TAG,"Paired Devices > 0");
+                            for (BluetoothDevice device : pairedDevices) {
+                                if (device.getName().equals("Rasp Wiki"))
+                                {
+                                    Log.d(TAG, "Device paired: "+device.getName());
+                                    mmDevice = device;
+                                    Log.d(TAG, "Device assigned ");
+                                    UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
+                                    Log.d(TAG, "UUID assigned ");
+                                    try {
+                                        mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+                                        Log.d(TAG,"mmSocket Created");
+                                        mmSocket.connect();
+                                        Log.d(TAG,"mmSocket Connected");
+                                        String msg = "r";
+                                        OutputStream mmOutputStream = mmSocket.getOutputStream();
+                                        Log.d(TAG,"mmOutputStream created");
+                                        mmOutputStream.write(msg.getBytes());
+                                        Log.d(TAG,"Msg Send 'r' (read)");
+
+                                    } catch (IOException e) {
+                                        Log.e(TAG,"Error trying to create mmSocket");
+                                        Log.e(TAG,e.toString());
+                                        e.printStackTrace();
+                                    }
+                                    break;
+                                }
+                            }
+                            return true;
                         }
-                        else{
-                            Log.d(TAG,"No device found...");
+                        else
+                        {
+                            Log.d(TAG,"No paired devices...");
+                            return false;
+                        }
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean result)
+                    {
+                        if(!result){
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("Error")
+                                    .setMessage("Error while trying to pair with device!")
+                                    .setIcon(android.R.drawable.ic_dialog_alert)
+                                    .show();
                             debugLabel.setText("No device...");
                             syncImage.setImageResource(R.drawable.sync_off);
                             centerShape.setVisibility(View.GONE);
                         }
+                        else {
+                            debugLabel.setText("Paired");
+                            textViewReadDate.setText("Use the sync button!");
+                            syncImage.setImageResource(R.drawable.sync_off);
+                            centerShape.setVisibility(View.VISIBLE);
+                            buttonBeginRead.setVisibility(View.VISIBLE);
+                            buttonEndRead.setVisibility(View.VISIBLE);
+                        }
+                        //called on ui thread
+
+                        if (this.dialog != null) {
+                            this.dialog.dismiss();
+                        }
                     }
-                }
-                else
-                {
-                    Log.d(TAG,"No paired devices...");
-                }
+
+                };
+
+                beginBluetoothConnection.execute();
             }
             if(resultCode == RESULT_CANCELED){
                 Log.d(TAG, "Cant enable bluetooth!! Finishing the app");
@@ -345,6 +388,7 @@ public class MainActivity extends AppCompatActivity
             {
                 Log.d(TAG,"mmInputStream created and !workdone, starting worker thread");
                 syncImage.setImageResource(R.drawable.sync_on);
+                debugLabel.setText("Synchronized");
                 workerThread.start();
             }
             else{

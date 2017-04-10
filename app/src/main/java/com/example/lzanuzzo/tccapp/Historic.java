@@ -76,6 +76,30 @@ public class Historic extends AppCompatActivity {
                 onActivityResult(1,-1,enableBluetooth);
             }
         }
+
+        readList = new ArrayList<>();
+        listViewHistoric = (ListView) findViewById(R.id.ListViewHistoric);
+        listViewHistoric.setLongClickable(true);
+        listViewHistoric.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1,int position, long arg3)
+            {
+                String positionContent = listViewHistoric.getItemAtPosition(position).toString();
+                Toast.makeText(Historic.this, "Position: " + positionContent, Toast.LENGTH_SHORT).show();
+            }
+        });
+        listViewHistoric.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long id) {
+
+                String positionContent = listViewHistoric.getItemAtPosition(position).toString();
+                Toast.makeText(Historic.this, "Position: " + positionContent, Toast.LENGTH_SHORT).show();
+
+                return true;
+            }
+        });
+
     }
 
     private class getReadList extends AsyncTask<Void, Void, Void> {
@@ -233,75 +257,80 @@ public class Historic extends AppCompatActivity {
         if (requestCode == REQ_BT_ENABLE) {
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "BlueTooth is now Enabled");
-                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                if (pairedDevices.size() > 0) {
-                    for (BluetoothDevice device : pairedDevices) {
-                        if (device.getName().equals("Rasp Wiki"))
+
+                final AsyncTask<BluetoothSocket, Void, Boolean> beginBluetoothConnection = new AsyncTask<BluetoothSocket, Void, Boolean>() {
+                    private ProgressDialog dialog;
+
+                    @Override
+                    protected void onPreExecute()
+                    {
+                        this.dialog = new ProgressDialog(Historic.this);
+                        this.dialog.setMessage("Attempting to pair with the device...");
+                        this.dialog.setCancelable(true);
+                        this.dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
                         {
-                            Log.d(TAG, "Device paired: "+device.getName());
-                            mmDevice = device;
-                            Log.d(TAG, "Device assigned ");
-                            UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
-                            Log.d(TAG, "UUID assigned ");
-
-                            try {
-                                String msg = "h";
-
-                                mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-                                Log.d(TAG,"mmSocket Created");
-                                mmSocket.connect();
-                                Log.d(TAG,"mmSocket Connected");
-                                OutputStream mmOutputStream = mmSocket.getOutputStream();
-                                Log.d(TAG,"mmOutputStream created");
-                                mmOutputStream.write(msg.getBytes());
-                                Log.d(TAG,"Msg Send 'h' (Historic)");
-
-                                readList = new ArrayList<>();
-                                listViewHistoric = (ListView) findViewById(R.id.ListViewHistoric);
-                                listViewHistoric.setLongClickable(true);
-                                listViewHistoric.setOnItemClickListener(new AdapterView.OnItemClickListener()
-                                {
-                                    @Override
-                                    public void onItemClick(AdapterView<?> arg0, View arg1,int position, long arg3)
-                                    {
-                                        String positionContent = listViewHistoric.getItemAtPosition(position).toString();
-                                        Toast.makeText(Historic.this, "Position: " + positionContent, Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                                listViewHistoric.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                                    @Override
-                                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long id) {
-
-                                        String positionContent = listViewHistoric.getItemAtPosition(position).toString();
-                                        Toast.makeText(Historic.this, "Position: " + positionContent, Toast.LENGTH_SHORT).show();
-
-                                        return true;
-                                    }
-                                });
-                                new getReadList().execute();
-
-                            } catch (IOException e) {
-                                Log.e(TAG,"Error trying to create mmSocket");
-                                Log.e(TAG,e.toString());
-                                new AlertDialog.Builder(this)
-                                        .setTitle("Error")
-                                        .setMessage("Error trying to connect with the raspberry!")
-                                        .setIcon(android.R.drawable.ic_dialog_alert)
-                                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                                            @Override
-                                            public void onCancel(DialogInterface dialog) {
-                                                finish();
-                                            }
-                                        })
-                                        .show();
-
-                                e.printStackTrace();
+                            @Override
+                            public void onCancel(DialogInterface dialog)
+                            {
+                                // cancel AsyncTask
+                                cancel(false);
                             }
+                        });
 
-                        }
+                        this.dialog.show();
+
                     }
 
-                }
+                    @Override
+                    protected Boolean doInBackground(BluetoothSocket... params)
+                    {
+                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                        if (pairedDevices.size() > 0) {
+                            for (BluetoothDevice device : pairedDevices) {
+                                if (device.getName().equals("Rasp Wiki"))
+                                {
+                                    Log.d(TAG, "Device paired: "+device.getName());
+                                    mmDevice = device;
+                                    Log.d(TAG, "Device assigned ");
+                                    UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
+                                    Log.d(TAG, "UUID assigned ");
+                                    try {
+                                        String msg = "h";
+                                        mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+                                        Log.d(TAG,"mmSocket Created");
+                                        mmSocket.connect();
+                                        Log.d(TAG,"mmSocket Connected");
+                                        OutputStream mmOutputStream = mmSocket.getOutputStream();
+                                        Log.d(TAG,"mmOutputStream created");
+                                        mmOutputStream.write(msg.getBytes());
+                                        Log.d(TAG,"Msg Send 'h' (Historic)");
+                                        return true;
+                                    } catch (IOException e) {
+                                        Log.e(TAG,"Error trying to create mmSocket");
+                                        Log.e(TAG,e.toString());
+                                        e.printStackTrace();
+                                        return false;
+                                    }
+
+                                }
+                            }
+                            return false;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean result)
+                    {
+                        if(result){
+                            new getReadList().execute();
+                        }
+                        if (this.dialog != null) {
+                            this.dialog.dismiss();
+                        }
+                    }
+                };
+                beginBluetoothConnection.execute();
             }
         }
         if(resultCode == RESULT_CANCELED){
