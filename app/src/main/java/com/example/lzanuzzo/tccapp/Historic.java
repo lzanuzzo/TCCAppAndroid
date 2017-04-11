@@ -37,6 +37,8 @@ public class Historic extends AppCompatActivity {
     Integer REQ_BT_ENABLE=1;
     Integer BT_AC_FLAG = 1;
 
+    ListAdapter adapterHistoric;
+
     private ProgressDialog pDialogHistoric;
     private ListView listViewHistoric;
 
@@ -47,8 +49,6 @@ public class Historic extends AppCompatActivity {
     InputStream mmInputStream;
 
     ArrayList<HashMap<String, String>> readList;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,10 +92,20 @@ public class Historic extends AppCompatActivity {
         listViewHistoric.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long id) {
-
                 String positionContent = listViewHistoric.getItemAtPosition(position).toString();
-                Toast.makeText(Historic.this, "Position: " + positionContent, Toast.LENGTH_SHORT).show();
+                positionContent = positionContent.replaceAll("\\{id=", "");
+                String[] content = positionContent.split(",");
+                final String stringId = content[0];
 
+                new AlertDialog.Builder(Historic.this)
+                        .setTitle("Delete")
+                        .setMessage("Do you really want to delete this read?")
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                deleteRead(stringId);
+                            }})
+                        .setNegativeButton(android.R.string.no, null).show();
                 return true;
             }
         });
@@ -116,9 +126,7 @@ public class Historic extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... arg0) {
-            HttpHandler serviceHandler = new HttpHandler();
 
-            String jsonStr = "";
             Boolean HistoricGet = true;
             Boolean BeginRead = false;
             final byte delimiter = 10; //This is the ASCII code for a newline character
@@ -132,7 +140,6 @@ public class Historic extends AppCompatActivity {
                     mmSocket.connect();
 
                 }
-                //mmOutputStream = mmSocket.getOutputStream();
                 mmInputStream = mmSocket.getInputStream();
                 while(HistoricGet) {
                     try {
@@ -144,23 +151,31 @@ public class Historic extends AppCompatActivity {
                             for (int i = 0; i < bytesAvailable; i++) {
                                 byte b = packetBytes[i];
                                 if (b == delimiter) {
+
                                     byte[] encodedBytes = new byte[readBufferPosition];
                                     System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
                                     final String data = new String(encodedBytes, "US-ASCII");
                                     readBufferPosition = 0;
                                     //Log.d(TAG,data);
-                                    if(Objects.equals(data ,getResources().getString(R.string.begin_historic_data))){
+
+                                    if(data.equals("initialhistoric")){
                                         Log.d(TAG,"Find initial string for historic");
-                                        BeginRead = true;
+                                        if(BeginRead == true){
+                                            HistoricGet = false;
+                                        }
+                                        else {
+                                            BeginRead = true;
+                                        }
                                     }
-                                    else if(Objects.equals(data,getResources().getString(R.string.end_historic_data))){
+                                    else if(data.equals("finalhistoric")){
                                         Log.d(TAG,"Find final string for historic");
                                         if(BeginRead == true){
                                             HistoricGet = false;
                                         }
                                         BeginRead = false;
                                     }
-                                    if(BeginRead == true && !Objects.equals(data,getResources().getString(R.string.begin_historic_data))){
+
+                                    if(BeginRead == true && !data.equals("initialhistoric")){
                                         historicalStrings.add(data);
                                     }
 
@@ -177,17 +192,6 @@ public class Historic extends AppCompatActivity {
                         HistoricGet = false;
                     }
                     if (!HistoricGet){
-                        try {
-                            Log.d(TAG,"Work is done, closing the socket");
-                            //String msg = "h";
-                            //mmOutputStream.write(msg.getBytes());
-                            mmSocket.close();
-
-                        } catch (IOException e) {
-                            Log.e(TAG,"mmSocket not connected, connecting...");
-                            Log.e(TAG,e.toString());
-                            e.printStackTrace();
-                        }
                         break;
                     }
 
@@ -232,7 +236,7 @@ public class Historic extends AppCompatActivity {
             /**
              * Updating parsed JSON data into ListView
              * */
-            ListAdapter adapter = new SimpleAdapter(
+            adapterHistoric = new SimpleAdapter(
                     Historic.this, readList,
                     R.layout.list_item, new String[]
                     {   "liters",
@@ -247,7 +251,7 @@ public class Historic extends AppCompatActivity {
                         R.id.textViewListId
                     });
 
-            listViewHistoric.setAdapter(adapter);
+            listViewHistoric.setAdapter(adapterHistoric);
         }
 
     }
@@ -276,9 +280,7 @@ public class Historic extends AppCompatActivity {
                                 cancel(false);
                             }
                         });
-
                         this.dialog.show();
-
                     }
 
                     @Override
@@ -324,6 +326,9 @@ public class Historic extends AppCompatActivity {
                     {
                         if(result){
                             new getReadList().execute();
+                        }
+                        else{
+                            finish();
                         }
                         if (this.dialog != null) {
                             this.dialog.dismiss();
@@ -373,6 +378,95 @@ public class Historic extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         BT_AC_FLAG = 0;
+        listViewHistoric.setAdapter(null);
+    }
+
+    public void deleteRead(final String readId){
+        final AsyncTask<BluetoothSocket, Void, Boolean> deleteReadAsyncTask = new AsyncTask<BluetoothSocket, Void, Boolean>() {
+            private ProgressDialog dialog;
+
+            @Override
+            protected void onPreExecute()
+            {
+                this.dialog = new ProgressDialog(Historic.this);
+                this.dialog.setMessage("Trying to delete a read...");
+                this.dialog.setCancelable(true);
+                this.dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+                {
+                    @Override
+                    public void onCancel(DialogInterface dialog)
+                    {
+                        cancel(false);
+                    }
+                });
+
+                this.dialog.show();
+
+            }
+
+            @Override
+            protected Boolean doInBackground(BluetoothSocket... params)
+            {
+                Log.d(TAG,"Delete read raspberry pressed");
+                if(mmSocket!=null){
+                    Log.d(TAG,"mmSocket available");
+                    try {
+                        if (!mmSocket.isConnected() ){
+                            Log.d(TAG,"mmSocket not connected, connecting...");
+                            mmSocket.connect();
+                        }
+                        String msg = "d:"+readId;
+
+                        mmOutputStream = mmSocket.getOutputStream();
+                        Log.d(TAG,"mmOutputStream created");
+                        mmOutputStream.write(msg.getBytes());
+                        Log.d(TAG,"Msg Send 'd:"+readId+"' (delete)");
+                    } catch (IOException e) {
+                        Log.e(TAG,"Exception trying to delete the read raspberry");
+                        Log.e(TAG,e.toString());
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result)
+            {
+                if(result == false){
+                    errorAlertDialog("Error trying to delete a read!");
+                }
+                else{
+                    listViewHistoric.setAdapter(null);
+                    try {
+                        if(mmSocket!=null) {
+                            mmSocket.close();
+                            Log.d(TAG,"Socket Closed");
+                        }
+                    }
+                    catch (IOException e) {
+                        Log.e(TAG,"Error closing mmSocket...");
+                        Log.e(TAG,e.toString());
+                        e.printStackTrace();
+                    }
+                    recreate();
+                }
+                //called on ui thread
+                if (this.dialog != null) {
+                    this.dialog.dismiss();
+                }
+            }
+
+            @Override
+            protected void onCancelled()
+            {
+                //called on ui thread
+                if (this.dialog != null) {
+                    this.dialog.dismiss();
+                }
+            }
+        };
+        deleteReadAsyncTask.execute();
     }
 
     public void errorAlertDialog(String errorMsg){

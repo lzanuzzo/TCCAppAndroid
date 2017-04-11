@@ -35,8 +35,7 @@ public class Config extends AppCompatActivity {
 
     Integer BT_AC_FLAG = 1;
 
-    Button resetButton;
-    Button cleanButton;
+    Button shutdownButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +44,7 @@ public class Config extends AppCompatActivity {
 
         Log.d(TAG,"On create Called");
 
-        resetButton = (Button) findViewById(R.id.buttonReset);
-        cleanButton = (Button) findViewById(R.id.buttonClean);
+        shutdownButton = (Button) findViewById(R.id.buttonShutdown);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(mBluetoothAdapter == null)
@@ -69,93 +67,14 @@ public class Config extends AppCompatActivity {
             }
         }
 
-        resetButton.setOnClickListener(new View.OnClickListener() {
+        shutdownButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                resetRasp();
+                shutdownRasp();
             }
         });
-        cleanButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                cleanDatabase();
-            }
-        });
-
     }
 
-    void cleanDatabase(){
-        final AsyncTask<BluetoothSocket, Void, Boolean> cleanDatabaseAsyncTask = new AsyncTask<BluetoothSocket, Void, Boolean>() {
-            private ProgressDialog dialog;
-
-            @Override
-            protected void onPreExecute()
-            {
-                this.dialog = new ProgressDialog(Config.this);
-                this.dialog.setMessage("Trying to clean raspberry database...");
-                this.dialog.setCancelable(true);
-                this.dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
-                {
-                    @Override
-                    public void onCancel(DialogInterface dialog)
-                    {
-                        cancel(false);
-                    }
-                });
-
-                this.dialog.show();
-
-            }
-
-            @Override
-            protected Boolean doInBackground(BluetoothSocket... params)
-            {
-                Log.d(TAG,"Clean raspberry database pressed");
-                if(mmSocket!=null){
-                    Log.d(TAG,"mmSocket available");
-                    try {
-                        if (!mmSocket.isConnected() ){
-                            Log.d(TAG,"mmSocket not connected, connecting...");
-                            mmSocket.connect();
-                        }
-                        String msg = "c";
-
-                        mmOutputStream = mmSocket.getOutputStream();
-                        Log.d(TAG,"mmOutputStream created");
-                        mmOutputStream.write(msg.getBytes());
-                        Log.d(TAG,"Msg Send 'c' (clean)");
-                    } catch (IOException e) {
-                        Log.e(TAG,"Exception trying to clean database");
-                        Log.e(TAG,e.toString());
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result)
-            {
-                if(result == false){
-                    errorAlertDialog("Error trying to clean database!");
-                }
-                //called on ui thread
-                if (this.dialog != null) {
-                    this.dialog.dismiss();
-                }
-            }
-
-            @Override
-            protected void onCancelled()
-            {
-                //called on ui thread
-                if (this.dialog != null) {
-                    this.dialog.dismiss();
-                }
-            }
-        };
-        cleanDatabaseAsyncTask.execute();
-    }
-
-    void resetRasp(){
+    void shutdownRasp(){
         final AsyncTask<BluetoothSocket, Void, Boolean> resetAsyncTask = new AsyncTask<BluetoothSocket, Void, Boolean>() {
             private ProgressDialog dialog;
 
@@ -163,7 +82,7 @@ public class Config extends AppCompatActivity {
             protected void onPreExecute()
             {
                 this.dialog = new ProgressDialog(Config.this);
-                this.dialog.setMessage("Trying to reset raspberry...");
+                this.dialog.setMessage("Trying to send shutdown command...");
                 this.dialog.setCancelable(true);
                 this.dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
                 {
@@ -181,7 +100,7 @@ public class Config extends AppCompatActivity {
             @Override
             protected Boolean doInBackground(BluetoothSocket... params)
             {
-                Log.d(TAG,"Reset raspberry pressed");
+                Log.d(TAG,"Shutdown raspberry pressed");
                 if(mmSocket!=null){
                     Log.d(TAG,"mmSocket available");
                     try {
@@ -189,14 +108,14 @@ public class Config extends AppCompatActivity {
                             Log.d(TAG,"mmSocket not connected, connecting...");
                             mmSocket.connect();
                         }
-                        String msg = "r";
+                        String msg = "s";
 
                         mmOutputStream = mmSocket.getOutputStream();
                         Log.d(TAG,"mmOutputStream created");
                         mmOutputStream.write(msg.getBytes());
-                        Log.d(TAG,"Msg Send 'r' (reset)");
+                        Log.d(TAG,"Msg Send 's' (shutdown)");
                     } catch (IOException e) {
-                        Log.e(TAG,"Exception trying to reset raspberry");
+                        Log.e(TAG,"Exception trying to shutdown raspberry");
                         Log.e(TAG,e.toString());
                         return false;
                     }
@@ -208,7 +127,7 @@ public class Config extends AppCompatActivity {
             protected void onPostExecute(Boolean result)
             {
                 if(result == false){
-                    errorAlertDialog("Error trying to reset raspberry!");
+                    errorAlertDialog("Error trying to shutdown raspberry!");
                 }
                 //called on ui thread
                 if (this.dialog != null) {
@@ -233,36 +152,76 @@ public class Config extends AppCompatActivity {
         if (requestCode == REQ_BT_ENABLE) {
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "BlueTooth is now Enabled");
-                Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                if (pairedDevices.size() > 0) {
-                    for (BluetoothDevice device : pairedDevices) {
-                        if (device.getName().equals("Rasp Wiki")) {
-                            Log.d(TAG, "Device paired: " + device.getName());
-                            mmDevice = device;
-                            Log.d(TAG, "Device assigned ");
-                            UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
-                            Log.d(TAG, "UUID assigned ");
 
-                            try {
-                                mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-                                Log.d(TAG,"mmSocket Created");
-                                mmSocket.connect();
-                                Log.d(TAG,"mmSocket Connected");
 
-                            }catch (IOException e) {
-                                Log.e(TAG,"Error trying to create mmSocket");
-                                Log.e(TAG,e.toString());
-                                errorAlertDialog("Error trying to connect with the raspberry!");
-                                e.printStackTrace();
+                final AsyncTask<BluetoothSocket, Void, Boolean> beginBluetoothConnection = new AsyncTask<BluetoothSocket, Void, Boolean>() {
+                    private ProgressDialog dialog;
+
+                    @Override
+                    protected void onPreExecute() {
+                        this.dialog = new ProgressDialog(Config.this);
+                        this.dialog.setMessage("Attempting to pair with the device...");
+                        this.dialog.setCancelable(true);
+                        this.dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                // cancel AsyncTask
+                                cancel(false);
                             }
+                        });
+                        this.dialog.show();
+                    }
 
+                    @Override
+                    protected Boolean doInBackground(BluetoothSocket... params)
+                    {
+                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+                        if (pairedDevices.size() > 0) {
+                            for (BluetoothDevice device : pairedDevices) {
+                                if (device.getName().equals("Rasp Wiki")) {
+                                    Log.d(TAG, "Device paired: " + device.getName());
+                                    mmDevice = device;
+                                    Log.d(TAG, "Device assigned ");
+                                    UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); //Standard SerialPortService ID
+                                    Log.d(TAG, "UUID assigned ");
+
+                                    try {
+                                        mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+                                        Log.d(TAG,"mmSocket Created");
+                                        mmSocket.connect();
+                                        Log.d(TAG,"mmSocket Connected");
+                                        return true;
+
+                                    }catch (IOException e) {
+                                        Log.e(TAG,"Error trying to create mmSocket");
+                                        Log.e(TAG,e.toString());
+                                        e.printStackTrace();
+                                        return false;
+                                    }
+                                }
+                            }
+                            return false;
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean result)
+                    {
+                        if(!result){
+                            finish();
+                        }
+                        if (this.dialog != null) {
+                            this.dialog.dismiss();
                         }
                     }
-                }
+
+                };
+                beginBluetoothConnection.execute();
             }
         }
         if(resultCode == RESULT_CANCELED){
-            Log.d(TAG, "Cant enable bluetooth!! Finishing the app");
+            Log.d(TAG, "Cant enable bluetooth!! Finishing the activity");
             finish();
         }
     }
