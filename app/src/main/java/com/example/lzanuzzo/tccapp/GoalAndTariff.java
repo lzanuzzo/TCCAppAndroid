@@ -1,6 +1,5 @@
 package com.example.lzanuzzo.tccapp;
 
-import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,17 +17,18 @@ import java.io.InputStreamReader;
 public class GoalAndTariff extends AppCompatActivity {
 
     String goalValue;
-    String cubicMeters;
-    String volumeValue;
+    String minConsump;
+    String tariffValue;
     File file;
+
     String filename = "waterfyAppVariables";
     FileOutputStream outputStream;
     FileInputStream inputStream;
     static final int READ_BLOCK_SIZE = 100;
     private String TAG = GoalAndTariff.class.getSimpleName();
     EditText goalEditText;
-    EditText cubicMetersEditText;
-    EditText volumeValueEditText;
+    EditText minConsumpEditText;
+    EditText tariffEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +36,8 @@ public class GoalAndTariff extends AppCompatActivity {
         setContentView(R.layout.activity_goal_and_tariff);
 
         goalEditText        = (EditText) findViewById(R.id.goal_value);
-        cubicMetersEditText = (EditText) findViewById(R.id.tariff_volume);
-        volumeValueEditText = (EditText) findViewById(R.id.tariff_value);
+        minConsumpEditText = (EditText) findViewById(R.id.minConsup);
+        tariffEditText = (EditText) findViewById(R.id.tariffValue);
 
         try {
             file = new File(GoalAndTariff.this.getFilesDir(), filename);
@@ -63,12 +63,12 @@ public class GoalAndTariff extends AppCompatActivity {
                     String[] valuesArray = valuesString.split(";");
                     if(valuesArray.length == 3){
                         goalValue = valuesArray[0];
-                        cubicMeters = valuesArray[1];
-                        volumeValue = valuesArray[2];
+                        minConsump = valuesArray[1];
+                        tariffValue = valuesArray[2];
 
                         goalEditText.setText(goalValue);
-                        cubicMetersEditText.setText(cubicMeters);
-                        volumeValueEditText.setText(volumeValue);
+                        minConsumpEditText.setText(minConsump);
+                        tariffEditText.setText(tariffValue);
                         Log.d(TAG,"Values set at EditText's");
                     }
 
@@ -82,13 +82,13 @@ public class GoalAndTariff extends AppCompatActivity {
                 Log.d(TAG,GoalAndTariff.this.getFilesDir().toString());
                 outputStream = new FileOutputStream(GoalAndTariff.this.getFilesDir()+"/"+filename);
                 //outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.write("10;10;26.20".getBytes());
+                outputStream.write("1;0.001;2.62".getBytes());
                 outputStream.close();
                 Log.d(TAG,"Default values loaded successfully");
 
-                goalEditText.setText("110");
-                cubicMetersEditText.setText("10");
-                volumeValueEditText.setText("26.20");
+                goalEditText.setText("1");
+                minConsumpEditText.setText("0.001");
+                tariffEditText.setText("2.62");
 
                 Toast.makeText(getBaseContext(), "Default values are set!",
                         Toast.LENGTH_SHORT).show();
@@ -105,7 +105,7 @@ public class GoalAndTariff extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 try {
                     outputStream = new FileOutputStream(GoalAndTariff.this.getFilesDir()+"/"+filename);
-                    newString = s.toString()+";"+cubicMetersEditText.getText()+";"+volumeValueEditText.getText();
+                    newString = s.toString()+";"+ minConsumpEditText.getText()+";"+tariffEditText.getText();
                     outputStream.write(newString.getBytes());
                     outputStream.close();
                     Log.d(TAG,"New values loaded successfully at afterTextChanged goal value");
@@ -120,13 +120,13 @@ public class GoalAndTariff extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
 
-        cubicMetersEditText.addTextChangedListener(new TextWatcher() {
+        minConsumpEditText.addTextChangedListener(new TextWatcher() {
             String newString;
 
             public void afterTextChanged(Editable s) {
                 try {
                     outputStream = new FileOutputStream(GoalAndTariff.this.getFilesDir()+"/"+filename);
-                    newString = goalEditText.getText()+";"+s.toString()+";"+volumeValueEditText.getText();
+                    newString = goalEditText.getText()+";"+s.toString()+";"+tariffEditText.getText();
                     outputStream.write(newString.getBytes());
                     outputStream.close();
                     Log.d(TAG,"New values loaded successfully at cubic meter value");
@@ -141,13 +141,13 @@ public class GoalAndTariff extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
 
-        volumeValueEditText.addTextChangedListener(new TextWatcher() {
+        tariffEditText.addTextChangedListener(new TextWatcher() {
             String newString;
 
             public void afterTextChanged(Editable s) {
                 try {
                     outputStream = new FileOutputStream(GoalAndTariff.this.getFilesDir()+"/"+filename);
-                    newString = goalEditText.getText()+";"+cubicMetersEditText.getText()+";"+s.toString();
+                    newString = goalEditText.getText()+";"+ minConsumpEditText.getText()+";"+s.toString();
                     outputStream.write(newString.getBytes());
                     outputStream.close();
                     Log.d(TAG,"New values loaded successfully at afterTextChanged volume Value");

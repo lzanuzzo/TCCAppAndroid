@@ -7,7 +7,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +20,6 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,13 +27,19 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 import static android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE;
 
-public class Historic extends AppCompatActivity {
+public class Historic extends AppCompatActivity
+implements ChartFragment.OnFragmentInteractionListener
+{
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 
     private String TAG = Historic.class.getSimpleName();
 
@@ -86,7 +95,12 @@ public class Historic extends AppCompatActivity {
             public void onItemClick(AdapterView<?> arg0, View arg1,int position, long arg3)
             {
                 String positionContent = listViewHistoric.getItemAtPosition(position).toString();
-                Toast.makeText(Historic.this, "Position: " + positionContent, Toast.LENGTH_SHORT).show();
+                Log.d(TAG,"Chart Fragment at position :"+positionContent);
+                Fragment chart = new ChartFragment();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                Log.d(TAG,"Before Commit");
+                fragmentTransaction.replace(R.id.chart, chart).commit();
             }
         });
         listViewHistoric.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -205,12 +219,12 @@ public class Historic extends AppCompatActivity {
             String dataString;
             if(!historicalStrings.isEmpty()){
 
-
                 for (int i=0;i < historicalStrings.size();i++)
                 {
                     dataString = historicalStrings.get(i);
                     String[] dataStringParts = dataString.split(",");
-                    String litersStr = dataStringParts[3];
+
+                    String litersStr = String.format("%.2f ml",Float.parseFloat(dataStringParts[3]));
                     String start_dateStr = dataStringParts[4];
                     String end_dateStr = dataStringParts[5];
                     String id = dataStringParts[0];

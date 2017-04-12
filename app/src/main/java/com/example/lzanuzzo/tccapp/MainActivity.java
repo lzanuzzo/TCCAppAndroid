@@ -78,8 +78,8 @@ public class MainActivity extends AppCompatActivity
     Button buttonEndRead;
 
     int goalValue;
-    Float cubicMeters;
-    Float volumeValue;
+    Float minConsump;
+    Float tariffValue;
     Float spendNow;
 
     @Override
@@ -337,16 +337,20 @@ public class MainActivity extends AppCompatActivity
                                                 String[] dataArray = data.split(";");
                                                 Log.e(TAG,data.toString());
                                                 if(dataArray.length == 3){
-                                                    textViewFlowValue.setText(dataArray[1] + " l/min");
-                                                    textViewLitersValue.setText(dataArray[2] + " ml");
+
+                                                    Float flow = Float.parseFloat(dataArray[1]);
+                                                    Float liters = Float.parseFloat(dataArray[2]);
+
+                                                    textViewFlowValue.setText(String.format("%.2f l/mins",flow));
+                                                    textViewLitersValue.setText(String.format("%.2f ml",liters));
                                                     textViewUnixValue.setText(dataArray[0] + " s");
 
                                                     Float litersNow = Float.parseFloat(dataArray[2]);
-                                                    if(cubicMeters != 0.0f){
-                                                        spendNow = ((litersNow/1000.0f)*volumeValue)/cubicMeters;
+                                                    if((litersNow/1000.0f) > minConsump){
+                                                        spendNow = ((litersNow/1000.0f)* tariffValue);
                                                     }
                                                     else spendNow = 0.0f;
-                                                    textViewSpend.setText(" R$ "+spendNow.toString());
+                                                    textViewSpend.setText(String.format("R$ %.2f",spendNow));
                                                 }
                                                 else {
                                                     workDone = true;
@@ -623,12 +627,12 @@ public class MainActivity extends AppCompatActivity
                 if(valuesArray.length == 3){
 
                     goalValue = Integer.parseInt(valuesArray[0]);
-                    cubicMeters = Float.parseFloat(valuesArray[1]);
-                    volumeValue = Float.parseFloat(valuesArray[2]);
+                    minConsump = Float.parseFloat(valuesArray[1]);
+                    tariffValue = Float.parseFloat(valuesArray[2]);
 
-                    textViewGoal.setText(" "+valuesArray[0]+" L");
+                    textViewGoal.setText(" "+valuesArray[0]+" m³");
                     textViewSpend.setText(" R$ "+spendNow.toString());
-                    textViewTariff.setText(" R$"+valuesArray[2]+" - "+valuesArray[1]+"m³");
+                    textViewTariff.setText(valuesArray[2]+" R$/m³");
 
                     Log.d(TAG,"Values set at EditText's");
                 }
@@ -638,7 +642,7 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG,MainActivity.this.getFilesDir().toString());
                 FileOutputStream fileOutputStream = new FileOutputStream(MainActivity.this.getFilesDir()+"/"+filename);
                 //outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                fileOutputStream.write("10;10;26.20".getBytes());
+                fileOutputStream.write("1;0.001;2.62".getBytes());
                 fileOutputStream.close();
                 Log.d(TAG,"Default values loaded successfully");
             }

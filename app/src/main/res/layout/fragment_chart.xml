@@ -1,0 +1,19 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:ap="http://schemas.android.com/apk/res-auto"
+    tools:context="com.example.lzanuzzo.tccapp.ChartFragment">
+
+    <com.androidplot.xy.XYPlot
+        style="@style/APDefacto.Light"
+        android:id="@+id/plot"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        ap:title="Water consumption"
+        ap:rangeTitle="Volume"
+        ap:domainTitle="Time"
+        ap:lineLabels="left|bottom"
+        ap:lineLabelRotationBottom="-45"/>
+
+</FrameLayout>

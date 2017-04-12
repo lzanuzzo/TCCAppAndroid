@@ -13,35 +13,28 @@
     tools:context="com.example.lzanuzzo.tccapp.GoalAndTariff">
 
     <LinearLayout
-        android:id="@+id/linear_layout_goal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:elevation="@dimen/elevation"
-        android:layout_margin="@dimen/well_margin"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
         >
 
         <TextView
-            android:textSize="@dimen/fontBig"
-            android:text="Goal: \n in Liters"
-            android:layout_margin="@dimen/fab_margin"
-            android:textAlignment="center"
-            android:textColor="@color/colorPrimaryLight"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/textView"
+            android:text="Goal \n in m³: "
+            android:textSize="@dimen/fontBig"
+            android:layout_margin="@dimen/fab_margin"
+            android:textColor="@color/colorPrimaryLight"
             />
 
         <EditText
             android:textSize="@dimen/fontBig"
             android:elevation="@dimen/elevation"
             android:background="@drawable/layout_bg_green"
-            android:padding="@dimen/well_margin"
-            android:layout_gravity="center"
+            android:padding="@dimen/fab_margin"
             android:layout_margin="@dimen/fab_margin"
-            android:textAlignment="center"
             android:textColor="@color/colorPrimaryLight"
+            android:textAlignment="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="number"
@@ -52,89 +45,60 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+    >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fab_margin"
+            android:text="Minimum \n consumption in m³: "
+            android:textSize="@dimen/fontBig"
+            android:textColor="@color/colorPrimaryLight"
+            />
+        <EditText
+            android:textSize="@dimen/fontBig"
+            android:layout_margin="@dimen/fab_margin"
+            android:elevation="@dimen/elevation"
+            android:background="@drawable/layout_bg_green"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimaryLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:ems="5"
+            android:padding="@dimen/fab_margin"
+            android:id="@+id/minConsup" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
         >
 
-        <LinearLayout
-            android:id="@+id/linear_layout_tariff_text"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:elevation="@dimen/elevation"
+        <TextView
             android:layout_margin="@dimen/fab_margin"
-            android:layout_weight="1"
-            >
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Average Tariff \n in R$/m³: "
+            android:textSize="@dimen/fontBig"
+            android:textColor="@color/colorPrimaryLight"
+            />
 
-            <TextView
-                android:textSize="@dimen/fontBig"
-                android:layout_gravity="center"
-                android:textAlignment="center"
-                android:textColor="@color/colorPrimaryLight"
-                android:text="Cubic Meters: "
-                android:layout_margin="@dimen/fab_margin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/textView2" />
-
-            <TextView
-                android:textSize="@dimen/fontBig"
-                android:layout_gravity="center"
-                android:textAlignment="center"
-                android:layout_margin="@dimen/fab_margin"
-                android:textColor="@color/colorPrimaryLight"
-                android:text="Value R$: "
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/textView3" />
-
-
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/linear_layout_tariff_numbers"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:layout_weight="1"
-            >
-
-            <EditText
-                android:textSize="@dimen/fontBig"
-                android:layout_margin="@dimen/fab_margin"
-                android:elevation="@dimen/elevation"
-                android:background="@drawable/layout_bg_green"
-                android:layout_gravity="center"
-                android:textAlignment="center"
-                android:textColor="@color/colorPrimaryLight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:ems="5"
-                android:padding="@dimen/fab_margin"
-                android:id="@+id/tariff_volume" />
-
-            <EditText
-                android:textSize="@dimen/fontBig"
-                android:layout_margin="@dimen/fab_margin"
-                android:elevation="@dimen/elevation"
-                android:background="@drawable/layout_bg_green"
-                android:layout_gravity="center"
-                android:textAlignment="center"
-                android:textColor="@color/colorPrimaryLight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                android:ems="5"
-                android:padding="@dimen/fab_margin"
-                android:id="@+id/tariff_value" />
-
-        </LinearLayout>
-
+        <EditText
+            android:textSize="@dimen/fontBig"
+            android:layout_margin="@dimen/fab_margin"
+            android:elevation="@dimen/elevation"
+            android:background="@drawable/layout_bg_green"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimaryLight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:ems="5"
+            android:padding="@dimen/fab_margin"
+            android:id="@+id/tariffValue" />
     </LinearLayout>
-
-
-
-
 
 </LinearLayout>

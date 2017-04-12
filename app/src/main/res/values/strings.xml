@@ -9,4 +9,7 @@
     <string name="end_historic_data">finalhistoric\r</string>
     <string name="begin_historic_data">initialhistoric</string>
     <string name="filenameVariables">waterfyAppVariables</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
