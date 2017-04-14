@@ -20,6 +20,7 @@ import com.androidplot.xy.XYSeries;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 
@@ -90,30 +91,55 @@ public class ChartFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        /*Number[] series2Numbers = {5, 2, 10, 5, 20, 10, 40, 20, 80, 40};*/
 
-        final Number[] domainLabels = {1, 2, 3, 6, 7, 8, 9, 10, 13, 14};
-        Number[] series1Numbers = {1, 4, 2, 8, 4, 16, 8, 32, 16, 64};
-        Number[] series2Numbers = {5, 2, 10, 5, 20, 10, 40, 20, 80, 40};
+        String[] xSeries = mParam1.split(",");
+        String[] ySeries = mParam2.split(",");
+        ArrayList <Double> xSeriesDouble = new ArrayList<Double>();
+        ArrayList <Double> ySeriesDouble = new ArrayList <Double>();
+
+
+        for (int i=1;i < xSeries.length;i++)
+        {
+            try{
+                xSeriesDouble.add(Double.parseDouble(xSeries[i]));
+                ySeriesDouble.add(Double.parseDouble(ySeries[i]));
+            }catch (NumberFormatException e)
+            {
+                Log.d(TAG,"Some problem at: "+i+" position in the chart");
+                e.printStackTrace();
+            }
+        }
+
+        final Number[] domainLabels = new Number[xSeriesDouble.size()];
+        Number[] series1Numbers = new Number[ySeriesDouble.size()];
+        for (int i=0;i < domainLabels.length;i++)
+        {
+            domainLabels[i] = xSeriesDouble.get(i);
+            series1Numbers[i] = ySeriesDouble.get(i);
+        }
+
+
         XYSeries series1 = new SimpleXYSeries(
                 Arrays.asList(series1Numbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series1");
-        XYSeries series2 = new SimpleXYSeries(
-                Arrays.asList(series2Numbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series2");
+        /*XYSeries series2 = new SimpleXYSeries(
+                Arrays.asList(series2Numbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series2");*/
 
         LineAndPointFormatter series1Format =
-                new LineAndPointFormatter(Color.RED, Color.GREEN, null, null);
+                new LineAndPointFormatter(Color.RED, Color.RED, null, null);
 
-        LineAndPointFormatter series2Format =
-                new LineAndPointFormatter(Color.RED, Color.GREEN, null, null);
+        /*LineAndPointFormatter series2Format =
+                new LineAndPointFormatter(Color.RED, Color.GREEN, null, null);*/
 
         series1Format.setInterpolationParams(
                 new CatmullRomInterpolator.Params(10, CatmullRomInterpolator.Type.Centripetal));
 
-        series2Format.setInterpolationParams(
-                new CatmullRomInterpolator.Params(50, CatmullRomInterpolator.Type.Centripetal));
+        /*series2Format.setInterpolationParams(
+                new CatmullRomInterpolator.Params(50, CatmullRomInterpolator.Type.Centripetal));*/
 
         // add a new series' to the xyplot:
         plot.addSeries(series1, series1Format);
-        plot.addSeries(series2, series2Format);
+        //plot.addSeries(series2, series2Format);
 
         plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
             @Override

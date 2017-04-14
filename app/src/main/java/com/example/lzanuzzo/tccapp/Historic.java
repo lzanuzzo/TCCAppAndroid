@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.UUID;
 
 import static android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE;
@@ -96,11 +97,10 @@ implements ChartFragment.OnFragmentInteractionListener
             {
                 String positionContent = listViewHistoric.getItemAtPosition(position).toString();
                 Log.d(TAG,"Chart Fragment at position :"+positionContent);
-                Fragment chart = new ChartFragment();
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                Log.d(TAG,"Before Commit");
-                fragmentTransaction.replace(R.id.chart, chart).commit();
+                positionContent = positionContent.replaceAll("\\{id=", "");
+                String[] content = positionContent.split(",");
+                final String stringId = content[0];
+                getChartData(stringId);
             }
         });
         listViewHistoric.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -148,67 +148,63 @@ implements ChartFragment.OnFragmentInteractionListener
             int readBufferPosition = 0;
             List<String> historicalStrings = new ArrayList<>();
             try {
-                if (!mmSocket.isConnected()) {
+                if (mmSocket.isConnected()) {
+                    mmInputStream = mmSocket.getInputStream();
+                    while (HistoricGet) {
+                        try {
+                            int bytesAvailable = mmInputStream.available();
+                            readBufferPosition = 0;
+                            if (bytesAvailable > 0) {
+                                byte[] packetBytes = new byte[bytesAvailable];
+                                mmInputStream.read(packetBytes);
+                                for (int i = 0; i < bytesAvailable; i++) {
+                                    byte b = packetBytes[i];
+                                    if (b == delimiter) {
 
-                    Log.d(TAG,"mmSocket not connected, connecting...");
-                    mmSocket.connect();
+                                        byte[] encodedBytes = new byte[readBufferPosition];
+                                        System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                                        final String data = new String(encodedBytes, "US-ASCII");
+                                        readBufferPosition = 0;
+                                        //Log.d(TAG,data);
 
-                }
-                mmInputStream = mmSocket.getInputStream();
-                while(HistoricGet) {
-                    try {
-                        int bytesAvailable = mmInputStream.available();
-                        readBufferPosition = 0;
-                        if (bytesAvailable > 0) {
-                            byte[] packetBytes = new byte[bytesAvailable];
-                            mmInputStream.read(packetBytes);
-                            for (int i = 0; i < bytesAvailable; i++) {
-                                byte b = packetBytes[i];
-                                if (b == delimiter) {
-
-                                    byte[] encodedBytes = new byte[readBufferPosition];
-                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    final String data = new String(encodedBytes, "US-ASCII");
-                                    readBufferPosition = 0;
-                                    //Log.d(TAG,data);
-
-                                    if(data.equals("initialhistoric")){
-                                        Log.d(TAG,"Find initial string for historic");
-                                        if(BeginRead == true){
-                                            HistoricGet = false;
+                                        if (data.equals("initialhistoric")) {
+                                            Log.d(TAG, "Find initial string for historic");
+                                            if (BeginRead == true) {
+                                                HistoricGet = false;
+                                            } else {
+                                                BeginRead = true;
+                                            }
+                                        } else if (data.equals("finalhistoric")) {
+                                            Log.d(TAG, "Find final string for historic");
+                                            if (BeginRead == true) {
+                                                HistoricGet = false;
+                                            }
+                                            BeginRead = false;
                                         }
-                                        else {
-                                            BeginRead = true;
-                                        }
-                                    }
-                                    else if(data.equals("finalhistoric")){
-                                        Log.d(TAG,"Find final string for historic");
-                                        if(BeginRead == true){
-                                            HistoricGet = false;
-                                        }
-                                        BeginRead = false;
-                                    }
 
-                                    if(BeginRead == true && !data.equals("initialhistoric")){
-                                        historicalStrings.add(data);
-                                    }
+                                        if (BeginRead == true && !data.equals("initialhistoric")) {
+                                            historicalStrings.add(data);
+                                        }
 
-                                }else {
-                                    readBuffer[readBufferPosition++] = b;
+                                    } else {
+                                        readBuffer[readBufferPosition++] = b;
+                                    }
                                 }
+
                             }
-
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error reading data, work done");
+                            Log.e(TAG, e.toString());
+                            HistoricGet = false;
                         }
-                    }
-                    catch (IOException e) {
-                        Log.e(TAG,"Error reading data, work done");
-                        Log.e(TAG,e.toString());
-                        HistoricGet = false;
-                    }
-                    if (!HistoricGet){
-                        break;
-                    }
+                        if (!HistoricGet) {
+                            break;
+                        }
 
+                    }
+                }
+                else{
+                    Log.d(TAG,"Socket is not connected for read historical data..");
                 }
             } catch (IOException e) {
                 Log.e(TAG,"Error reading data, work done");
@@ -270,13 +266,201 @@ implements ChartFragment.OnFragmentInteractionListener
 
     }
 
+    private class getReadChart extends AsyncTask<String, Void, Boolean>{
+        private ProgressDialog dialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            this.dialog = new ProgressDialog(Historic.this);
+            this.dialog.setMessage("Attempting to pair with the device...");
+            this.dialog.setCancelable(true);
+            this.dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+            {
+                @Override
+                public void onCancel(DialogInterface dialog)
+                {
+                    // cancel AsyncTask
+                    cancel(false);
+                }
+            });
+            this.dialog.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            String id = params[0];
+            Boolean ChartGet = true;
+            Boolean BeginRead = false;
+            final byte delimiter = 10; //This is the ASCII code for a newline character
+            byte[] readBuffer = new byte[1024];
+            int readBufferPosition = 0;
+            List<String> chartStrings = new ArrayList<>();
+            if (mmSocket.isConnected()) {
+                while (ChartGet) {
+                    try {
+                        int bytesAvailable = mmInputStream.available();
+                        readBufferPosition = 0;
+                        if (bytesAvailable > 0) {
+                            byte[] packetBytes = new byte[bytesAvailable];
+                            mmInputStream.read(packetBytes);
+                            for (int i = 0; i < bytesAvailable; i++) {
+                                byte b = packetBytes[i];
+                                if (b == delimiter) {
+                                    byte[] encodedBytes = new byte[readBufferPosition];
+                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                                    final String data = new String(encodedBytes, "US-ASCII");
+                                    readBufferPosition = 0;
+                                    Log.d(TAG,data);
+
+                                    if (data.equals("ini,"+id)) {
+                                        Log.d(TAG, "Find ini string for chart");
+                                        if (BeginRead == true) {
+                                            ChartGet = false;
+                                        } else {
+                                            BeginRead = true;
+                                        }
+                                    } else if (data.equals("fin,"+id)) {
+                                        Log.d(TAG, "Find fin string for chart");
+                                        if (BeginRead == true) {
+                                            ChartGet = false;
+                                        }
+                                        BeginRead = false;
+                                    }
+
+                                    if (BeginRead == true && !data.equals("ini,"+id)) {
+                                        chartStrings.add(data);
+                                    }
+
+                                } else {
+                                    readBuffer[readBufferPosition++] = b;
+                                }
+                            }
+
+                        }
+
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error reading data, work done");
+                        Log.e(TAG, e.toString());
+                        ChartGet = false;
+                    }
+                    if (!ChartGet) {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                Log.d(TAG,"Socket is not connected to read chart data");
+                return false;
+            }
+
+            if(!chartStrings.isEmpty()){
+                Log.d(TAG,"ChartData");
+                String xvalues = "";
+                String yvalues = "";
+                String[] splitedValues;
+                for (int i=0;i < chartStrings.size();i++)
+                {
+                    Log.e(TAG,chartStrings.get(i));
+                    splitedValues = chartStrings.get(i).split(",");
+                    xvalues = xvalues+","+splitedValues[0];
+                    yvalues = yvalues+","+splitedValues[2];
+                }
+
+                Fragment chart = ChartFragment.newInstance(xvalues,yvalues);
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                Log.d(TAG,"Before Commit");
+                fragmentTransaction.replace(R.id.chart, chart).commit();
+            }
+
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            if (this.dialog != null) {
+                this.dialog.dismiss();
+            }
+        }
+    }
+
+    public void getChartData(final String id){
+        if (mmSocket.isConnected()) {
+
+            final AsyncTask<String, Void, Boolean> beginChartLoop = new AsyncTask<String, Void, Boolean>() {
+
+                private ProgressDialog dialog;
+
+                @Override
+                protected void onPreExecute()
+                {
+                    this.dialog = new ProgressDialog(Historic.this);
+                    this.dialog.setMessage("Attempting to pair with the device...");
+                    this.dialog.setCancelable(true);
+                    this.dialog.setOnCancelListener(new DialogInterface.OnCancelListener()
+                    {
+                        @Override
+                        public void onCancel(DialogInterface dialog)
+                        {
+                            // cancel AsyncTask
+                            cancel(false);
+                        }
+                    });
+                    this.dialog.show();
+                }
+
+                @Override
+                protected Boolean doInBackground(String... params) {
+                    String id = params[0];
+                    try {
+                        String msg = "c:"+id;
+                        OutputStream mmOutputStream = mmSocket.getOutputStream();
+                        Log.d(TAG,"mmOutputStream created");
+                        mmOutputStream.write(msg.getBytes());
+                        Log.d(TAG,"Msg Send 'c:"+id+"' (Historic)");
+                        return true;
+                    } catch (IOException e) {
+                        Log.e(TAG,"Error trying to create mmSocket");
+                        Log.e(TAG,e.toString());
+                        e.printStackTrace();
+                        return false;
+                    }
+                }
+
+                @Override
+                protected void onPostExecute(Boolean result)
+                {
+                    if (this.dialog != null) {
+                        this.dialog.dismiss();
+                    }
+                    if(result){
+                        new getReadChart().execute(id);
+                    }
+                    else{
+                        finish();
+                    }
+                }
+
+            };
+            beginChartLoop.execute(id);
+        }
+        else {
+            errorAlertDialog("Socket not connected! Try again!");
+            Intent enableBluetooth = new Intent(ACTION_REQUEST_ENABLE);
+            onActivityResult(1,-1,enableBluetooth);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQ_BT_ENABLE) {
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "BlueTooth is now Enabled");
 
-                final AsyncTask<BluetoothSocket, Void, Boolean> beginBluetoothConnection = new AsyncTask<BluetoothSocket, Void, Boolean>() {
+                final AsyncTask<BluetoothSocket, Void, Boolean> beginHistoricLoop = new AsyncTask<BluetoothSocket, Void, Boolean>() {
                     private ProgressDialog dialog;
 
                     @Override
@@ -338,18 +522,18 @@ implements ChartFragment.OnFragmentInteractionListener
                     @Override
                     protected void onPostExecute(Boolean result)
                     {
+                        if (this.dialog != null) {
+                            this.dialog.dismiss();
+                        }
                         if(result){
                             new getReadList().execute();
                         }
                         else{
                             finish();
                         }
-                        if (this.dialog != null) {
-                            this.dialog.dismiss();
-                        }
                     }
                 };
-                beginBluetoothConnection.execute();
+                beginHistoricLoop.execute();
             }
         }
         if(resultCode == RESULT_CANCELED){
