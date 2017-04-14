@@ -9,6 +9,10 @@
     <string name="end_historic_data">finalhistoric\r</string>
     <string name="begin_historic_data">initialhistoric</string>
     <string name="filenameVariables">waterfyAppVariables</string>
+    <string name="explanatoryTextText">\n\n\nFor the list view below: \n\n\n
+                            Click to show the read chart.\n
+                            Click and hold to delete read.
+    </string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

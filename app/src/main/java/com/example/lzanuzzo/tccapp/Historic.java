@@ -21,14 +21,16 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.UUID;
 
 import static android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE;
@@ -60,6 +62,18 @@ implements ChartFragment.OnFragmentInteractionListener
 
     ArrayList<HashMap<String, String>> readList;
 
+    String goalValue;
+    String minConsump;
+    String tariff;
+    Float minConsumpFloat;
+    Float tariffFloat;
+    File file;
+
+    String filename = "waterfyAppVariables";
+    FileInputStream inputStream;
+    static final int READ_BLOCK_SIZE = 100;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +101,43 @@ implements ChartFragment.OnFragmentInteractionListener
             }
         }
 
+        try {
+            file = new File(Historic.this.getFilesDir(), filename);
+            if (file.exists()) {
+                Log.d(TAG, "The file exists!");
+                try {
+                    inputStream = openFileInput(filename);
+                    InputStreamReader InputRead = new InputStreamReader(inputStream);
+
+                    char[] inputBuffer = new char[READ_BLOCK_SIZE];
+                    String valuesString = "";
+                    int charRead;
+
+                    while ((charRead = InputRead.read(inputBuffer)) > 0) {
+                        // char to string conversion
+                        String readString = String.copyValueOf(inputBuffer, 0, charRead);
+                        valuesString += readString;
+                    }
+                    InputRead.close();
+                    Log.d(TAG, "Read file content!");
+
+                    String[] valuesArray = valuesString.split(";");
+                    if (valuesArray.length == 3) {
+
+                        goalValue = valuesArray[0];
+                        minConsump = valuesArray[1];
+                        tariff = valuesArray[2];
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, e.toString());
+                    e.printStackTrace();
+                }
+            }
+        }catch (Exception e) {
+            Log.e(TAG,e.toString());
+            e.printStackTrace();
+        }
+
         readList = new ArrayList<>();
         listViewHistoric = (ListView) findViewById(R.id.ListViewHistoric);
         listViewHistoric.setLongClickable(true);
@@ -97,9 +148,11 @@ implements ChartFragment.OnFragmentInteractionListener
             {
                 String positionContent = listViewHistoric.getItemAtPosition(position).toString();
                 Log.d(TAG,"Chart Fragment at position :"+positionContent);
-                positionContent = positionContent.replaceAll("\\{id=", "");
+                positionContent = positionContent.replaceAll(" id=", "");
                 String[] content = positionContent.split(",");
-                final String stringId = content[0];
+
+                final String stringId = content[1];
+                findViewById(R.id.explanatoryText).setVisibility(View.INVISIBLE);
                 getChartData(stringId);
             }
         });
@@ -107,9 +160,9 @@ implements ChartFragment.OnFragmentInteractionListener
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int position, long id) {
                 String positionContent = listViewHistoric.getItemAtPosition(position).toString();
-                positionContent = positionContent.replaceAll("\\{id=", "");
+                positionContent = positionContent.replaceAll(" id=", "");
                 String[] content = positionContent.split(",");
-                final String stringId = content[0];
+                final String stringId = content[1];
 
                 new AlertDialog.Builder(Historic.this)
                         .setTitle("Delete")
@@ -225,11 +278,21 @@ implements ChartFragment.OnFragmentInteractionListener
                     String end_dateStr = dataStringParts[5];
                     String id = dataStringParts[0];
 
+                    Float litersNow = Float.parseFloat(dataStringParts[3]);
+                    tariffFloat = Float.parseFloat(tariff);
+                    minConsumpFloat = Float.parseFloat(minConsump);
+                    Float spendNow;
+                    if((litersNow/1000.0f) > minConsumpFloat){
+                        spendNow = ((litersNow/1000.0f)* tariffFloat);
+                    }
+                    else spendNow = 0.0f;
+
                     HashMap<String, String> historicListItem = new HashMap<>();
                     historicListItem.put("liters",litersStr);
                     historicListItem.put("start_date",start_dateStr);
                     historicListItem.put("end_date",end_dateStr);
                     historicListItem.put("id",id);
+                    historicListItem.put("spend_value",String.format("R$ %.2f",spendNow));
 
                     readList.add(historicListItem);
                 }
@@ -252,13 +315,15 @@ implements ChartFragment.OnFragmentInteractionListener
                     {   "liters",
                         "start_date",
                         "end_date",
-                        "id"
+                        "id",
+                        "spend_value"
                     }, new int[]
                     {
                         R.id.textViewListLiters,
                         R.id.textViewListStartDate,
                         R.id.textViewListEndDate,
-                        R.id.textViewListId
+                        R.id.textViewListId,
+                        R.id.textViewListSpend
                     });
 
             listViewHistoric.setAdapter(adapterHistoric);
@@ -368,7 +433,7 @@ implements ChartFragment.OnFragmentInteractionListener
                     yvalues = yvalues+","+splitedValues[2];
                 }
 
-                Fragment chart = ChartFragment.newInstance(xvalues,yvalues);
+                Fragment chart = ChartFragment.newInstance(xvalues,yvalues, goalValue, minConsump);
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 Log.d(TAG,"Before Commit");

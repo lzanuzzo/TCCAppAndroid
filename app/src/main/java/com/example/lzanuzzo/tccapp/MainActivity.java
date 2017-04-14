@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity
     Button buttonBeginRead;
     Button buttonEndRead;
 
-    int goalValue;
+    Float goalValue;
     Float minConsump;
     Float tariffValue;
     Float spendNow;
@@ -304,8 +304,8 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG,"mmInputStream created");
 
             } catch (IOException e) {
-                Log.d(TAG,"Error trying to create mmInputStream");
-                Log.d(TAG,e.toString());
+                Log.e(TAG,"Error trying to create mmInputStream");
+                Log.e(TAG,e.toString());
                 e.printStackTrace();
             }
 
@@ -626,7 +626,7 @@ public class MainActivity extends AppCompatActivity
                 String[] valuesArray = valuesString.split(";");
                 if(valuesArray.length == 3){
 
-                    goalValue = Integer.parseInt(valuesArray[0]);
+                    goalValue = Float.parseFloat(valuesArray[0]);
                     minConsump = Float.parseFloat(valuesArray[1]);
                     tariffValue = Float.parseFloat(valuesArray[2]);
 

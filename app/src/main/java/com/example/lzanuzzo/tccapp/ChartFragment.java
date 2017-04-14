@@ -1,7 +1,6 @@
 package com.example.lzanuzzo.tccapp;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,7 +22,6 @@ import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -33,14 +31,15 @@ import java.util.Arrays;
  * create an instance of this fragment.
  */
 public class ChartFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_XVALUES = "xvaluesparam";
+    private static final String ARG_YVALUES = "yvaluesparam";
+    private static final String ARG_GVALUES = "goalvalueparam";
+    private static final String ARG_CVALUES = "minComsupvalueparam";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String xValuesParam;
+    private String yValuesParam;
+    private String goalParam;
+    private String minComsupParam;
     private XYPlot plot;
     private String TAG = ChartFragment.class.getSimpleName();
 
@@ -50,20 +49,13 @@ public class ChartFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ChartFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ChartFragment newInstance(String param1, String param2) {
+    public static ChartFragment newInstance(String pxValuesParam, String pyValuesParam, String pGoalParam, String pMinConsump) {
         ChartFragment fragment = new ChartFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_XVALUES, pxValuesParam);
+        args.putString(ARG_YVALUES, pyValuesParam);
+        args.putString(ARG_GVALUES, pGoalParam);
+        args.putString(ARG_CVALUES, pMinConsump);
         fragment.setArguments(args);
         return fragment;
     }
@@ -72,8 +64,10 @@ public class ChartFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            xValuesParam = getArguments().getString(ARG_XVALUES);
+            yValuesParam = getArguments().getString(ARG_YVALUES);
+            goalParam = getArguments().getString(ARG_GVALUES);
+            minComsupParam = getArguments().getString(ARG_CVALUES);
         }
         Log.d(TAG,"onCreate Fragment");
     }
@@ -83,6 +77,7 @@ public class ChartFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         Log.d(TAG,"onCreateView Fragment");
+
         View view = inflater.inflate(R.layout.fragment_chart, container, false);
         plot = (XYPlot) view.findViewById(R.id.plot);
         return view;
@@ -93,53 +88,68 @@ public class ChartFragment extends Fragment {
         super.onStart();
         /*Number[] series2Numbers = {5, 2, 10, 5, 20, 10, 40, 20, 80, 40};*/
 
-        String[] xSeries = mParam1.split(",");
-        String[] ySeries = mParam2.split(",");
+        String[] xSeries = xValuesParam.split(",");
+        String[] ySeries = yValuesParam.split(",");
         ArrayList <Double> xSeriesDouble = new ArrayList<Double>();
         ArrayList <Double> ySeriesDouble = new ArrayList <Double>();
-
+        ArrayList <Double> goalSeriesDouble = new ArrayList<Double>();
+        ArrayList <Double> minConsumSeriesDouble = new ArrayList <Double>();
 
         for (int i=1;i < xSeries.length;i++)
         {
             try{
+                goalSeriesDouble.add(Double.parseDouble(goalParam)*1000);
+                minConsumSeriesDouble.add(Double.parseDouble(minComsupParam)*1000);
                 xSeriesDouble.add(Double.parseDouble(xSeries[i]));
                 ySeriesDouble.add(Double.parseDouble(ySeries[i]));
             }catch (NumberFormatException e)
             {
-                Log.d(TAG,"Some problem at: "+i+" position in the chart");
+                Log.e(TAG,"Some problem at: "+i+" position in the chart");
+                Log.e(TAG,e.toString());
                 e.printStackTrace();
             }
         }
 
         final Number[] domainLabels = new Number[xSeriesDouble.size()];
-        Number[] series1Numbers = new Number[ySeriesDouble.size()];
+        Number[] VolumeNumbers = new Number[ySeriesDouble.size()];
+        Number[] GoalNumbers = new Number[goalSeriesDouble.size()];
+        Number[] ConsuNumbers = new Number[minConsumSeriesDouble.size()];
         for (int i=0;i < domainLabels.length;i++)
         {
+            GoalNumbers[i] = goalSeriesDouble.get(i);
+            ConsuNumbers[i] = minConsumSeriesDouble.get(i);
             domainLabels[i] = xSeriesDouble.get(i);
-            series1Numbers[i] = ySeriesDouble.get(i);
+            VolumeNumbers[i] = ySeriesDouble.get(i);
         }
 
+        XYSeries volumeSeries = new SimpleXYSeries(
+                Arrays.asList(VolumeNumbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Volume");
+        XYSeries goalSeries = new SimpleXYSeries(
+                Arrays.asList(GoalNumbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Goal");
+        XYSeries minConsuSeries = new SimpleXYSeries(
+                Arrays.asList(ConsuNumbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Min. Cons.");
 
-        XYSeries series1 = new SimpleXYSeries(
-                Arrays.asList(series1Numbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series1");
-        /*XYSeries series2 = new SimpleXYSeries(
-                Arrays.asList(series2Numbers), SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, "Series2");*/
+        LineAndPointFormatter volumeFormat =
+                new LineAndPointFormatter(getContext(),R.xml.line_point_formatter_with_labels);
 
-        LineAndPointFormatter series1Format =
-                new LineAndPointFormatter(Color.RED, Color.RED, null, null);
+        LineAndPointFormatter goalFormat =
+                new LineAndPointFormatter(getContext(),R.xml.line_point_formatter_with_labels_goal);
 
-        /*LineAndPointFormatter series2Format =
-                new LineAndPointFormatter(Color.RED, Color.GREEN, null, null);*/
+        LineAndPointFormatter minConsuFormat =
+                new LineAndPointFormatter(getContext(),R.xml.line_point_formatter_with_labels_consum);
 
-        series1Format.setInterpolationParams(
-                new CatmullRomInterpolator.Params(10, CatmullRomInterpolator.Type.Centripetal));
+
+        /*volumeFormat.setInterpolationParams(
+                new CatmullRomInterpolator.Params(10, CatmullRomInterpolator.Type.Uniform));*/
 
         /*series2Format.setInterpolationParams(
                 new CatmullRomInterpolator.Params(50, CatmullRomInterpolator.Type.Centripetal));*/
 
         // add a new series' to the xyplot:
-        plot.addSeries(series1, series1Format);
-        //plot.addSeries(series2, series2Format);
+        plot.addSeries(volumeSeries, volumeFormat);
+        plot.addSeries(goalSeries, goalFormat);
+        plot.addSeries(minConsuSeries, minConsuFormat);
+
 
         plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
             @Override
