@@ -14,6 +14,13 @@
         ap:rangeTitle="Volume"
         ap:domainTitle="Time"
         ap:lineLabels="left|bottom"
-        ap:lineLabelRotationBottom="-45"/>
+        ap:lineLabelRotationBottom="0"
+        ap:graphMarginLeft="30dp"
+        ap:graphMarginBottom="15dp"
+        ap:gridBackgroundColor="@color/colorPrimaryLight"
+        ap:backgroundColor="@color/colorPrimaryLight"
+        ap:titleTextColor="@color/colorPrimaryDark"
+
+        />
 
 </FrameLayout>

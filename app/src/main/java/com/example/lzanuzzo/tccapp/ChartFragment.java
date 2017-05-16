@@ -1,6 +1,8 @@
 package com.example.lzanuzzo.tccapp;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -101,7 +103,7 @@ public class ChartFragment extends Fragment {
                 goalSeriesDouble.add(Double.parseDouble(goalParam)*1000);
                 minConsumSeriesDouble.add(Double.parseDouble(minComsupParam)*1000);
                 xSeriesDouble.add(Double.parseDouble(xSeries[i]));
-                ySeriesDouble.add(Double.parseDouble(ySeries[i]));
+                ySeriesDouble.add(Double.parseDouble(ySeries[i])/1000);
             }catch (NumberFormatException e)
             {
                 Log.e(TAG,"Some problem at: "+i+" position in the chart");
@@ -146,16 +148,21 @@ public class ChartFragment extends Fragment {
                 new CatmullRomInterpolator.Params(50, CatmullRomInterpolator.Type.Centripetal));*/
 
         // add a new series' to the xyplot:
+
         plot.addSeries(volumeSeries, volumeFormat);
         plot.addSeries(goalSeries, goalFormat);
         plot.addSeries(minConsuSeries, minConsuFormat);
 
+        Paint fundo = new Paint();
+        fundo.setARGB(0,0,0,0);
+        plot.getGraph().setBackgroundPaint(fundo);
+        plot.getGraph().getDomainCursorPaint().setARGB(0,0,0,0);
 
         plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.BOTTOM).setFormat(new Format() {
             @Override
             public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
                 int i = Math.round(((Number) obj).floatValue());
-                return toAppendTo.append(domainLabels[i]);
+                return toAppendTo.append("");
             }
             @Override
             public Object parseObject(String source, ParsePosition pos) {

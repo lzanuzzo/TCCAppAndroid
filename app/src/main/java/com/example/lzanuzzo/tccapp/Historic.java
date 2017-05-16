@@ -273,7 +273,7 @@ implements ChartFragment.OnFragmentInteractionListener
                     dataString = historicalStrings.get(i);
                     String[] dataStringParts = dataString.split(",");
 
-                    String litersStr = String.format("%.2f ml",Float.parseFloat(dataStringParts[3]));
+                    String litersStr = String.format("%.2f l",(Float.parseFloat(dataStringParts[3])/1000.0f));
                     String start_dateStr = dataStringParts[4];
                     String end_dateStr = dataStringParts[5];
                     String id = dataStringParts[0];
@@ -282,8 +282,8 @@ implements ChartFragment.OnFragmentInteractionListener
                     tariffFloat = Float.parseFloat(tariff);
                     minConsumpFloat = Float.parseFloat(minConsump);
                     Float spendNow;
-                    if((litersNow/1000.0f) > minConsumpFloat){
-                        spendNow = ((litersNow/1000.0f)* tariffFloat);
+                    if(((litersNow/1000.0f)/1000.0f) > minConsumpFloat){
+                        spendNow = (((litersNow/1000.0f)/1000.0f)* tariffFloat);
                     }
                     else spendNow = 0.0f;
 

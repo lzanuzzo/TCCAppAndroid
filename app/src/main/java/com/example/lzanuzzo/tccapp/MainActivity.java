@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity
         centerShape.setVisibility(View.GONE);
         buttonBeginRead.setVisibility(View.GONE);
         buttonEndRead.setVisibility(View.GONE);
+        textViewUnixValue.setVisibility(View.GONE);
 
         debugLabel.setText("No device...");
 
@@ -341,13 +342,13 @@ public class MainActivity extends AppCompatActivity
                                                     Float flow = Float.parseFloat(dataArray[1]);
                                                     Float liters = Float.parseFloat(dataArray[2]);
 
-                                                    textViewFlowValue.setText(String.format("%.2f l/mins",flow));
-                                                    textViewLitersValue.setText(String.format("%.2f ml",liters));
+                                                    textViewFlowValue.setText(String.format("%.2f l/min",flow));
+                                                    textViewLitersValue.setText(String.format("%.2f l",(liters/1000.0f)));
                                                     textViewUnixValue.setText(dataArray[0] + " s");
 
                                                     Float litersNow = Float.parseFloat(dataArray[2]);
-                                                    if((litersNow/1000.0f) > minConsump){
-                                                        spendNow = ((litersNow/1000.0f)* tariffValue);
+                                                    if(((litersNow/1000.0f)/1000.0f) > minConsump){
+                                                        spendNow = (((litersNow/1000.0f)/1000.0f)* tariffValue);
                                                     }
                                                     else spendNow = 0.0f;
                                                     textViewSpend.setText(String.format("R$ %.2f",spendNow));
@@ -473,13 +474,17 @@ public class MainActivity extends AppCompatActivity
             @Override
             protected void onPostExecute(Boolean result)
             {
+                String message_alert = "";
                 if(result == false){
-                    new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Error")
-                            .setMessage("Error trying to begin a read!")
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .show();
+                    message_alert = "Error trying to begin a read";
+                }else{
+                    message_alert = "Starting read \n (If one is not currently occurring)";
                 }
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("")
+                        .setMessage(message_alert)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
                 //called on ui thread
                 if (this.dialog != null) {
                     this.dialog.dismiss();
@@ -553,13 +558,17 @@ public class MainActivity extends AppCompatActivity
             @Override
             protected void onPostExecute(Boolean result)
             {
+                String message_alert = "";
                 if(result == false){
-                    new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Error")
-                            .setMessage("Error trying to end a read!")
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .show();
+                    message_alert = "Error trying to end a read";
+                }else{
+                    message_alert = "Finishing read \n (If one is currently occurring)";
                 }
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("")
+                        .setMessage(message_alert)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
                 //called on ui thread
                 if (this.dialog != null) {
                     this.dialog.dismiss();
